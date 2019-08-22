@@ -1,0 +1,17 @@
+<!doctype html>
+<title>Amazatic</title>
+<link rel=stylesheet type=text/css href="{{ url_for('static', filename='style.css') }}">
+<div class=page>
+    <h1> Amazatic</h1>
+    <div class=metanav>
+        {% if not session.logged_in %}
+        <a href="/admin">log in</a>
+        {% else %}
+        <a href="{{ url_for('auth.logout') }}">log out</a>
+        {% endif %}
+    </div>
+    <p>We pride ourselves on the quality of our work, using agile methodologies to deliver code; normally multiple times within 2 week sprints.
+
+        We also recognise that sharing the progress of that work is critical to keeping our customers happy and informed.</p>
+    Go to <a href="/admin">admin</a> Panel
+</div>
