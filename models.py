@@ -29,7 +29,11 @@ class Biometric(db.Model):
     bio_id = IntegerField(index=True)
     credentials = TextField(index=True)
     created_on = DateTimeField(default=datetime.datetime.now)
-    #updated_on = DateTimeField(default=datetime.datetime.now)
+    updated_on = DateTimeField(default=datetime.datetime.now)
 
     def __str__(self):
         return self.name
+    
+    def save(self, *args, **kwargs):
+        self.updated_on = datetime.datetime.now()
+        return super(Biometric, self).save(*args, **kwargs)

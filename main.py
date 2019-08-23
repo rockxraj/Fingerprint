@@ -24,4 +24,4 @@ def create_tables():
 
 if __name__ == '__main__':
     create_tables()
-    app.run()
+    app.run(host = '0.0.0.0')
