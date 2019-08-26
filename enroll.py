@@ -1,10 +1,8 @@
 import time
+import sys
 import hashlib
 from pyfingerprint.pyfingerprint import PyFingerprint
-#from models import Biometric
-import sys
-## Enrolls new finger
-##
+from display import Sender
 
 def enroll(name):
     ## Tries to initialize the sensor
@@ -16,7 +14,6 @@ def enroll(name):
         
     except Exception as e:
         print('The fingerprint sensor could not be initialized!')
-        print('Exception message: ' + str(e))
         return {"error" : str(e)}
     
         ## Gets some sensor information
@@ -32,7 +29,7 @@ def enroll(name):
         
         ## Converts read image to characteristics and stores it in charbuffer 1
         f.convertImage(0x01)
-            
+        
         ## Checks if finger is already enrolled
         result = f.searchTemplate()
         positionNumber = result[0]
@@ -78,13 +75,23 @@ def enroll(name):
         return {"error" : str(e)}
 
 def search_person():
+    s = Sender(0x27)
     try:
         f = PyFingerprint('/dev/ttyUSB0', 57600, 0xFFFFFFFF, 0x00000000)
 
         if ( f.verifyPassword() == False ):
+            s.set("Given fingerprint", 1)
+            s.set("sensor password is", 2)
+            s.set("wrong", 3)
+            time.sleep(3)
+            s.lcd_display.lcd.clear()
             return {'error' : 'The given fingerprint sensor password is wrong!'}
 
     except Exception as e:
+        s.set("The fingerprint sensor", 1)
+        s.set("could not be initialized!", 2)
+        time.sleep(6)
+        
         print('The fingerprint sensor could not be initialized!')
         return {"error" : + str(e)}
 
@@ -94,28 +101,32 @@ def search_person():
     ## Tries to search the finger and calculate hash
     try:
         print('Waiting for finger...')
-
+        s.set("Waiting for finger",1)
         ## Wait that finger is read
         while ( f.readImage() == False ):
             pass
 
         ## Converts read image to characteristics and stores it in charbuffer 1
         f.convertImage(0x01)
-
         ## Searchs template
         result = f.searchTemplate()
 
         positionNumber = result[0]
         accuracyScore = result[1]
-
+        s.lcd_display.lcd.clear()
         if ( positionNumber == -1 ):
-            return {"error" : "No match found!"}
+            s.set("No Match found !!!!!", 1)
+            time.sleep(3)
+            s.lcd_display.lcd.clear()
+            del s
+            return {"error" : "No match found!!!!!"}
         else:
+            s.set("Found template at Pos " + str(positionNumber), 1)
+            time.sleep(3)
+            del s
             print('Found template at position #' + str(positionNumber))
-        ## OPTIONAL stuff
-        ##
-        
-        ## Loads the found template to charbuffer 1
+        s.lcd_display.lcd.clear()
+        time.sleep(1)
         f.loadTemplate(positionNumber, 0x01)
 
         ## Downloads the characteristics of template loaded in charbuffer 1
@@ -126,6 +137,11 @@ def search_person():
         return {"error" : None, "pos" : str(positionNumber), "accuracy_score" : str(accuracyScore)}
     except Exception as e:
         print('Operation failed!')
+        #lcd_obj = lcd_display(0x27)
+        s.set("Operation failed", 1)
+        time.sleep(3)
+        s.lcd_display.lcd.clear()
+        del s
         return {"error" : str(e)}
 
 def delete_person(position_number):
