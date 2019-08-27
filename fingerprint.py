@@ -11,7 +11,7 @@ class Fingerprint:
     def _get_sensor(cls):
         if not hasattr(cls, '_sensor'):
             cls._sensor = PyFingerprint('/dev/ttyUSB0', 57600, 0xFFFFFFFF, 0x00000000)
-            cls._lcd = Sender()
+            cls._lcd = Sender() 
         return cls._sensor, cls._lcd
     
     def __init__(self):
@@ -36,18 +36,27 @@ class Fingerprint:
             positionNumber = result[0]
             accuracyScore = result[1]
             if ( positionNumber == -1 ):
-                self.lcd.set("No match found!!!!!",1)
+                self.lcd.clear()
+                self.lcd.set("No match found!!",1)
+                time.sleep(3)
+                self.lcd.clear()
                 return {"error" : "No match found!!!!!"}
             else:
                 print('Found template at position #' + str(positionNumber))
                 self.sensor.loadTemplate(positionNumber, 0x01)
                 characterics = str(self.sensor.downloadCharacteristics(0x01)).encode('utf-8')
                 print('SHA-2 hash of template: ' + hashlib.sha256(characterics).hexdigest())
+                self.lcd.clear()
                 self.lcd.set("Found template at " + str(positionNumber),1)
+                time.sleep(3)
+                self.lcd.clear()
                 return {"error" : None, "pos" : str(positionNumber), "accuracy_score" : str(accuracyScore)}
         except Exception as e:
             print('Operation failed!')
-            self.lcd.set('Operation failed !!!!!!!', 1)
+            self.lcd.clear()
+            self.lcd.set('Operation failed !!!', 1)
+            time.sleep(2)
+            self.lcd.clear()
             return {"error" : str(e)}
 
 
@@ -99,7 +108,7 @@ class Fingerprint:
         except Exception as e:
             print('Exception message: ' + str(e))
             return {"error": str(e)}
-
+        
 def execute_sensor():
     finger_obj = Fingerprint()
     return finger_obj

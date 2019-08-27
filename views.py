@@ -3,6 +3,7 @@ views imports app, auth, and models, but none of these import views
 """
 import os
 import json
+import time
 from flask import render_template, Response, jsonify
 from flask_peewee.utils import get_object_or_404, object_list
 from app import app
@@ -23,7 +24,10 @@ def search():
         person = Biometric.select().where(Biometric.bio_id==int(result['pos']))
         if person:
             data = person.get()
+            sensor.lcd.clear()
             sensor.lcd.set("Welcome %s !" % data.__data__['name'], 1)
+            time.sleep(2)
+            sensor.lcd.clear()
             return jsonify(data.__data__), 200
         else:
             return Response("User with this id does not exist in DB", status=404, mimetype='application/json')
